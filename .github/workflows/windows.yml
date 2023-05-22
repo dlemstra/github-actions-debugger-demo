@@ -19,7 +19,7 @@ jobs:
         Start-Service sshd
       name:  Start SSH Server
 
-    - run: windows.cmd
+    - run: .\windows.cmd
 
     - run: |
         gh cs ssh -c ${{ inputs.codespace }} true
