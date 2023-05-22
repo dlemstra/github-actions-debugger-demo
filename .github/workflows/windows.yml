@@ -42,6 +42,7 @@ jobs:
         scp %TEMP%\runner-user codespace:
         ssh -R 4748:localhost:22 codespace runner-connect
       shell: cmd
-      name: Setup SSH
+      name: Connect to Codespace
+      if: ${{ failure() && inputs.codespace != '' }}
       env:
         GH_TOKEN: ${{ secrets.TOKEN_FOR_CODESPACES }}
