@@ -19,30 +19,11 @@ jobs:
         Start-Service sshd
       name:  Start SSH Server
 
-    - run: .\windows.cmd
+    - run: windows.cmd
 
-    - run: |
-        gh cs ssh -c ${{ inputs.codespace }} true
-        type %USERPROFILE%\.ssh\codespaces.auto.pub > %USERPROFILE%\.ssh\authorized_keys
-        move /y %USERPROFILE%\.ssh\authorized_keys %ALLUSERSPROFILE%\ssh\administrators_authorized_keys
-        (
-        echo Host codespace
-        echo     HostName cs.${{ inputs.codespace }}.main
-        echo     User root
-        echo     ServerAliveInterval 60
-        echo     StrictHostKeyChecking no
-        echo     UserKnownHostsFile /dev/null
-        echo     ProxyCommand C:\Program Files\GitHub CLI\gh.exe cs ssh -c ${{ inputs.codespace }} --stdio -- -i %USERPROFILE%\.ssh\codespaces.auto
-        echo     IdentityFile %USERPROFILE%\.ssh\codespaces.auto
-        ) > %USERPROFILE%\.ssh\config
-        scp %USERPROFILE%\.ssh\codespaces.auto codespace:
-        echo %cd% > %TEMP%\runner-path
-        scp %TEMP%\runner-path codespace:
-        whoami > %TEMP%\runner-user
-        scp %TEMP%\runner-user codespace:
-        ssh -R 4748:localhost:22 codespace runner-connect
-      shell: cmd
-      name: Connect to Codespace
-      if: ${{ failure() && inputs.codespace != '' }}
-      env:
-        GH_TOKEN: ${{ secrets.TOKEN_FOR_CODESPACES }}
+    - name: Debug in Codespace
+      if: failure()
+      uses: dlemstra/github-actions-debugger@main
+      with:
+        token: ${{ secrets.TOKEN_FOR_CODESPACES }}
+        codespace: ${{ inputs.codespace }}
