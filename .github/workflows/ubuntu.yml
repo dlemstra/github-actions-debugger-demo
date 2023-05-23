@@ -16,27 +16,9 @@ jobs:
 
     - run: bash linux.sh
 
-    - run: |
-        gh cs ssh -c ${{ inputs.codespace }} true
-        cat ~/.ssh/codespaces.auto.pub >> ~/.ssh/authorized_keys
-        cat <<EOF >> ~/.ssh/config
-        Host codespace
-            HostName cs.${{ inputs.codespace }}.main
-            User root
-            ServerAliveInterval 60
-            StrictHostKeyChecking no
-            UserKnownHostsFile /dev/null
-            ProxyCommand /usr/bin/gh cs ssh -c ${{ inputs.codespace }} --stdio -- -i ~/.ssh/codespaces.auto
-            IdentityFile ~/.ssh/codespaces.auto
-        EOF
-        scp ~/.ssh/codespaces.auto codespace:
-        echo $PWD > /tmp/runner-path
-        scp /tmp/runner-path codespace:
-        whoami > /tmp/runner-user
-        scp /tmp/runner-user codespace:
-        printf "\ncd $PWD\n" >> ~/.bash_profile
-        ssh -R 4748:localhost:22 codespace runner-connect
-      name: Connect to Codespace
-      if: ${{ failure() && inputs.codespace != '' }}
-      env:
-        GH_TOKEN: ${{ secrets.TOKEN_FOR_CODESPACES }}
+    - name: Debug in Codespace
+      if: failure()
+      uses: dlemstra/github-actions-debugger@main
+      with:
+        token: ${{ secrets.TOKEN_FOR_CODESPACES }}
+        codespace: ${{ inputs.codespace }}

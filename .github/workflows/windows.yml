@@ -14,11 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - run: |
-        Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
-        Start-Service sshd
-      name:  Start SSH Server
-
     - run: windows.cmd
 
     - name: Debug in Codespace
